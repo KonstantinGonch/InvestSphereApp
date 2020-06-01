@@ -24,10 +24,14 @@
 	visibility: hidden;
 }
 
-#pane-result .success {
-	background-color: rgba(51, 170, 51, .4);
+#pane-result .lbl-error {
+	color: black;
 }
 
-#pane-result .fail {
-	backgrpund-color: gba(255,0,0,0.4);
+.block-right {
+	float : right;
+}
+
+.block-right label {
+	padding-right: 5px;
 }

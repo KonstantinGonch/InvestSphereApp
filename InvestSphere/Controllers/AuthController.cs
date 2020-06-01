@@ -22,7 +22,7 @@ namespace InvestSphere.Controllers
             _ctx = ctx;
         }
         [HttpGet]
-        public async Task<IActionResult> Get(string login, string password)
+        public async Task<IActionResult> Get(string login, string password, bool remember)
         {
             Dictionary<string, string> result = new Dictionary<string, string>();
             result.Add("result", "");
@@ -37,11 +37,52 @@ namespace InvestSphere.Controllers
             else
             {
                 if (AppHelper.VerifyHashedPassword(user.Password, password))
-                    return Ok(user);
+                {
+                    AuthToken token = new AuthToken();
+                    token.UserId = user.Id;
+                    token.Token = Guid.NewGuid().ToString();
+                    if (remember)
+                        token.ExpirationDate = new DateTime(2100, 12, 30);
+                    else
+                    {
+                        DateTime today = DateTime.Today;
+                        token.ExpirationDate = today.AddDays(1);
+                    }
+                    token.IsActive = true;
+                    _ctx.Tokens.Add(token);
+                    _ctx.SaveChanges();
+                    return Ok(token);
+                }
                 else
                     return NotFound(NOT_FOUND);
             }
-
         }
+
+        [HttpGet, Route("verify")]
+        public async Task<IActionResult> VerifyToken(string token)
+        {
+            AuthToken authToken = _ctx.Tokens.FirstOrDefault(t => t.Token == token);
+            if (authToken == null)
+                return NotFound();
+            else
+            {
+                if (!authToken.IsActive)
+                    return NotFound();
+                else
+                {
+                    if (authToken.ExpirationDate < DateTime.Today)
+                    {
+                        authToken.IsActive = false;
+                        _ctx.SaveChanges();
+                        return NotFound();
+                    }
+                    else
+                    {
+                        return Ok(token);
+                    }
+                }
+            }
+        }
+
     }
 }

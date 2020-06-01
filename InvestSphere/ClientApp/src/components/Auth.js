@@ -4,33 +4,48 @@ import './Auth.css';
 export class Auth extends Component {
 	constructor(props) {
 		super(props);
-		this.state = { login: '', password: '', userFound: false, paneVisible: false };
+		this.state = { login: '', password: '', paneClass: "invisible", rememberMe: false };
 		this.onAuthorize = this.onAuthorize.bind(this);
 		this.onLoginChange = this.onLoginChange.bind(this);
 		this.onPasswordChange = this.onPasswordChange.bind(this);
-		this.getPaneClass = this.getPaneClass.bind(this);
+		this.onRememberChange = this.onRememberChange.bind(this);
+
+		this.authKey = localStorage.getItem("auth");
 	}
 
-	async onAuthorize(event) {
+	componentDidMount() {
+		fetch("api/auth/verify?token=" + this.authKey)
+			.then((result) => {
+				if (result.status !== 404) {
+					window.open("/main");
+				}
+			});
+	}
+
+	 onAuthorize(event) {
 		event.preventDefault();
-		const response = await fetch("api/auth?login=" + this.state.login + "&password=" + this.state.password);
-		const data = await response.json();
-		if (data.id) {
-			this.setState({ paneVisible: true, userFound : true })
-		}
-		else {
-			this.setState({ paneVisible: true, userFound: false })
-		}
+		fetch("api/auth?login=" + this.state.login + "&password=" + this.state.password + "&remember=" + this.state.rememberMe)
+			.then(async (result) => {
+				if (result.status !== 404) {
+					var response = await result.json();
+					localStorage.setItem("auth", response.token);
+					window.open("/main");
+				}
+				else {
+					this.setState({ paneClass: "visible" });
+				}
+			});
+	}
+
+	onRememberChange(event) {
+		this.setState({ rememberMe: event.target.checked })
 	}
 
 	onLoginChange(event) {
-		this.setState({login : event.target.value})
+		this.setState({ login: event.target.value })
 	}
 	onPasswordChange(event) {
 		this.setState({ password: event.target.value })
-	}
-	getPaneClass() {
-		return this.state.paneVisible ? 'visible' + this.state.userFound ? 'success' : 'fail' : 'invisible'
 	}
 	render() {
 		return (
@@ -47,20 +62,26 @@ export class Auth extends Component {
 										<input onChange={this.onLoginChange} type="text" name="username" id="username" class="form-control" value={this.state.login} />
 									</div>
 									<div class="form-group">
-										<label  for="password" class="text-info">Пароль</label><br />
+										<label for="password" class="text-info">Пароль</label><br />
 										<input onChange={this.onPasswordChange} type="password" name="password" id="password" class="form-control" value={this.state.password} />
 									</div>
 									<div class="form-group">
-										<button class="btn btn-primary" onClick={this.onAuthorize}>Вход</button>
-										<br/>
-										<div>
-											<a href="#" class="text-info">Нет аккаунта? Зарегистрируйтесь</a>
+										<div class="form-group">
+											<button class="btn btn-primary" onClick={this.onAuthorize}>Вход</button>
+											<br />
+											<div>
+												<a href="#" class="text-info">Нет аккаунта? Зарегистрируйтесь</a>
+												<span class="block-right">
+													<label >Запомнить меня</label>
+													<input type="checkbox" checked={this.state.rememberMe} onChange={this.onRememberChange} />
+												</span>
+											</div>
 										</div>
 									</div>
 									<div class="form-group">
-										<div id="pane-result" class={this.getPaneClass}>
-											<i class={this.state.userFound ? 'fas fa-check' : 'fas fa-times'}></i>
-											<label>{this.state.userFound ? '' : 'Пользователь не найден'}</label>
+										<div id="pane-result" class={this.state.paneClass}>
+											<i class="fas fa-times"></i>
+											<label class="lbl-error">Пользователь не найден</label>
 										</div>
 									</div>
 								</form>

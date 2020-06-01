@@ -12,5 +12,12 @@ namespace InvestSphere.Models
 		public string LastName { get; set; }
 		public string Login { get; set; }
 		public string Password { get; set; }
+		public UserRole Role { get; set; }
+	}
+	
+	public enum UserRole
+	{
+		Ordinary = 0,
+		Administrator = 1
 	}
 }

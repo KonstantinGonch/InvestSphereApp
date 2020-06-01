@@ -10,6 +10,7 @@ namespace InvestSphere.Context
 	public class ApplicationContext : DbContext
 	{
 		public DbSet<User> Users { get; set; }
+		public DbSet<AuthToken> Tokens { get; set; }
 
 		public ApplicationContext(DbContextOptions options) : base(options)
 		{

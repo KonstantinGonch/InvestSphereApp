@@ -70,7 +70,7 @@ export class Auth extends Component {
 											<button class="btn btn-primary" onClick={this.onAuthorize}>Вход</button>
 											<br />
 											<div>
-												<a href="#" class="text-info">Нет аккаунта? Зарегистрируйтесь</a>
+												<a href="/register" class="text-info">Нет аккаунта? Зарегистрируйтесь</a>
 												<span class="block-right">
 													<label >Запомнить меня</label>
 													<input type="checkbox" checked={this.state.rememberMe} onChange={this.onRememberChange} />

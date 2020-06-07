@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using InvestSphere.Context;
 using InvestSphere.Models;
 using InvestSphere.Util;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InvestSphere.Controllers
@@ -83,6 +82,20 @@ namespace InvestSphere.Controllers
                 }
             }
         }
-
+        [HttpPost, Route("register")]
+        public async Task<IActionResult> RegisterUser([FromBody] User user)
+        {
+            if (!TryValidateModel(user, nameof(user)))
+            {
+                return Problem();
+            }
+            else
+            {
+                user.Password = AppHelper.HashPassword(user.Password);
+                _ctx.Users.Add(user);
+                _ctx.SaveChanges();
+                return Ok(user);
+            }
+        }
     }
 }
